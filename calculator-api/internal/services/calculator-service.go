@@ -3,6 +3,7 @@ package services
 import (
 	"calculator-api/internal/models"
 	"errors"
+	"log/slog"
 	"math"
 )
 
@@ -27,28 +28,47 @@ type CalculatorResponse struct {
 
 // PerformOperation executes the requested calculator operation
 func (s *CalculatorService) PerformOperation(req models.CalculatorRequest) (CalculatorResponse, error) {
+	slog.Info("Starting calculation", "operation", req.Operation, "a", *req.A, "b", req.B)
+	
 	switch req.Operation {
 	case "add":
-		return CalculatorResponse{Result: *req.A + *req.B}, nil
+		result := *req.A + *req.B
+		slog.Info("Addition operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "subtract":
-		return CalculatorResponse{Result: *req.A - *req.B}, nil
+		result := *req.A - *req.B
+		slog.Info("Subtraction operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "multiply":
-		return CalculatorResponse{Result: *req.A * *req.B}, nil
+		result := *req.A * *req.B
+		slog.Info("Multiplication operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "divide":
 		if *req.B == 0 {
+			slog.Error("Division by zero attempted", "a", *req.A, "b", *req.B)
 			return CalculatorResponse{}, ErrDivisionByZero
 		}
-		return CalculatorResponse{Result: *req.A / *req.B}, nil
+		result := *req.A / *req.B
+		slog.Info("Division operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "power":
-		return CalculatorResponse{Result: math.Pow(*req.A, *req.B)}, nil
+		result := math.Pow(*req.A, *req.B)
+		slog.Info("Power operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "sqrt":
 		if *req.A < 0 {
+			slog.Error("Square root of negative number attempted", "a", *req.A)
 			return CalculatorResponse{}, ErrSqrtOfNegative
 		}
-		return CalculatorResponse{Result: math.Sqrt(*req.A)}, nil
+		result := math.Sqrt(*req.A)
+		slog.Info("Square root operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	case "percentage":
-		return CalculatorResponse{Result: *req.A * (*req.B / 100)}, nil
+		result := *req.A * (*req.B / 100)
+		slog.Info("Percentage operation completed", "result", result)
+		return CalculatorResponse{Result: result}, nil
 	default:
+		slog.Error("Unsupported operation attempted", "operation", req.Operation)
 		return CalculatorResponse{}, ErrUnsuportedOperation
 	}
 }
