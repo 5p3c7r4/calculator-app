@@ -184,7 +184,7 @@ function Calculator() {
             <button onClick={() => inputNumber("4")} className="btn number">4</button>
             <button onClick={() => inputNumber("5")} className="btn number">5</button>
             <button onClick={() => inputNumber("6")} className="btn number">6</button>
-            <button onClick={() => performOperation("subtract")} className="btn operator">−</button>
+            <button onClick={() => performOperation("subtract")} className="btn operator">-</button>
 
             <button onClick={() => inputNumber("1")} className="btn number">1</button>
             <button onClick={() => inputNumber("2")} className="btn number">2</button>
