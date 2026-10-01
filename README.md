@@ -109,3 +109,21 @@ Performs mathematical operations.
 - Error handling at both frontend and backend levels
 - Graceful shutdown handling for the server
 - Proper logging implementation
+
+## Useful Prompts
+
+### Architecture
+- Act as a senior software architect. Design a clean monorepo structure for a React + TypeScript frontend and Go + Gin backend. Keep frontend and backend independent, testable, and easy to Dockerize. Avoid over-engineering.
+### Backend
+- Design an idiomatic Go + Gin project structure for a calculator REST API. Separate handlers, business logic, validation, and routing. Keep it simple and testable.
+- Create a Go testing strategy for a Gin calculator API using table-driven tests. Cover business logic, handlers, validation, and edge cases.
+### API
+- Design a REST API contract for a calculator supporting add, subtract, multiply, divide, percentage, power, and square root. Define endpoints, request/response JSON, validation, and error handling.
+- Show how to mock fetch with Vitest for a React app consuming a REST API. Include successful responses, HTTP errors, and network failures. Do not use MSW.
+### Frontend
+- Design the React state and component logic for a calculator supporting basic and advanced operations, decimals, clear, sign toggle, and API-based calculations. Keep the implementation simple.
+### Unit test
+- Create a testing strategy for a React + TypeScript calculator using Vitest and React Testing Library. Cover user interactions, API success/error responses, validation, and asynchronous state updates.
+- Set up frontend coverage with Vitest and backend coverage with Go. Generate HTML reports and document the commands in the README.
+### Docker
+- Design a multi-stage Dockerfile for a React/Vite frontend and Go/Gin backend in the same repository. Build both and serve the React static files from Go in a minimal production image.
