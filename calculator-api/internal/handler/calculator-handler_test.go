@@ -117,7 +117,7 @@ func TestCalculatorHandlerCalculate(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectError:    true,
-			errorMessage:   "division by zero",
+			errorMessage:   "you can not divide by zero",
 		},
 		{
 			name: "divide negative numbers",
@@ -184,7 +184,7 @@ func TestCalculatorHandlerCalculate(t *testing.T) {
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectError:    true,
-			errorMessage:   "square root of negative number",
+			errorMessage:   "you can not get square root of a negative number",
 		},
 
 		// Percentage tests
