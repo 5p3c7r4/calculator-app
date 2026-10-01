@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner"
 
 // Calculator component for performing mathematical operations
 function Calculator() {
@@ -46,9 +47,21 @@ function Calculator() {
         })
       });
       const result = await response.json();
+
+      // Check if the response contains an error object
+      if (result && typeof result === 'object' && 'error' in result) {
+        throw new Error(result.error);
+      }
+
       return result.result;
-    } catch (error) {
-      console.error('Error performing calculation:', error);
+    } catch (error: any) {
+      toast.error(error.message, {
+        style: {
+          background: '#fee2e2',
+          color: '#b91c1c',
+          border: '1px solid #ef4444',
+        },
+      })
       throw new Error('Calculation failed');
     }
   };
