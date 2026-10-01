@@ -33,7 +33,7 @@ func main() {
 
 	r.POST("api/v1/calculator", handler.Calculate)
 
-	httpAddr := ":8080"
+	httpAddr := ":8000"
 	server := &http.Server{
 		Addr:         httpAddr,
 		Handler:      r,
@@ -41,6 +41,14 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
+
+	// For serving frontend
+	r.Static("/assets", "./frontend/assets")
+	r.StaticFile("/", "./frontend/index.html")
+
+	r.NoRoute(func(c *gin.Context) {
+		c.File("./frontend/index.html")
+	})
 
 	go func() {
 		slog.InfoContext(ctx, "HTTP Server Listening on "+httpAddr)
