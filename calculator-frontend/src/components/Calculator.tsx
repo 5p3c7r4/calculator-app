@@ -144,7 +144,7 @@ function Calculator() {
           </div>
         </section>
 
-        <div className="calculator">
+        <div className="calculator" data-testid="calculator">
           <div className="display">
             <input
               type="text"
