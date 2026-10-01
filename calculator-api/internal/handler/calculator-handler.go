@@ -30,6 +30,11 @@ func (h *CalculatorHandler) Calculate(c *gin.Context) {
 		return
 	}
 
+	if req.A == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Parameter A is required"})
+		return
+	}
+
 	// Validate that B is provided for operations that need it
 	needsB := req.Operation != "sqrt" && req.Operation != "perc"
 	if needsB && req.B == nil {

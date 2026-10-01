@@ -29,25 +29,25 @@ type CalculatorResponse struct {
 func (s *CalculatorService) PerformOperation(req models.CalculatorRequest) (CalculatorResponse, error) {
 	switch req.Operation {
 	case "add":
-		return CalculatorResponse{Result: req.A + *req.B}, nil
+		return CalculatorResponse{Result: *req.A + *req.B}, nil
 	case "subtract":
-		return CalculatorResponse{Result: req.A - *req.B}, nil
+		return CalculatorResponse{Result: *req.A - *req.B}, nil
 	case "multiply":
-		return CalculatorResponse{Result: req.A * *req.B}, nil
+		return CalculatorResponse{Result: *req.A * *req.B}, nil
 	case "divide":
 		if *req.B == 0 {
 			return CalculatorResponse{}, ErrDivisionByZero
 		}
-		return CalculatorResponse{Result: req.A / *req.B}, nil
+		return CalculatorResponse{Result: *req.A / *req.B}, nil
 	case "power":
-		return CalculatorResponse{Result: math.Pow(req.A, *req.B)}, nil
+		return CalculatorResponse{Result: math.Pow(*req.A, *req.B)}, nil
 	case "sqrt":
-		if req.A < 0 {
+		if *req.A < 0 {
 			return CalculatorResponse{}, ErrSqrtOfNegative
 		}
-		return CalculatorResponse{Result: math.Sqrt(req.A)}, nil
+		return CalculatorResponse{Result: math.Sqrt(*req.A)}, nil
 	case "percentage":
-		return CalculatorResponse{Result: req.A * (*req.B / 100)}, nil
+		return CalculatorResponse{Result: *req.A * (*req.B / 100)}, nil
 	default:
 		return CalculatorResponse{}, ErrUnsuportedOperation
 	}
