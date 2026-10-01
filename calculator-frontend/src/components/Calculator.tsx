@@ -35,7 +35,7 @@ function Calculator() {
 
   const makeApiCall = async (operation: string, a: number, b?: number) => {
     try {
-      const response = await fetch('api/v1/calculator', {
+      const response = await fetch('/api/v1/calculator', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,20 +49,23 @@ function Calculator() {
       const result = await response.json();
 
       // Check if the response contains an error object
-      if (result && typeof result === 'object' && 'error' in result) {
-        throw new Error(result.error);
+      if (!response.ok) {
+        throw new Error(result.error ?? 'Calculation failed');
       }
 
       return result.result;
-    } catch (error: any) {
-      toast.error(error.message, {
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : 'Calculation failed';
+      toast.error(message, {
         style: {
           background: '#fee2e2',
           color: '#b91c1c',
           border: '1px solid #ef4444',
         },
       })
-      throw new Error('Calculation failed');
+      throw error;
     }
   };
 
@@ -79,10 +82,10 @@ function Calculator() {
       const currentValue = previousValue || 0;
 
       try {
-        const result = await makeApiCall(nextOperation, currentValue, inputValue);
+        const result = await makeApiCall(operation, currentValue, inputValue);
+        setOperation(nextOperation);
         setDisplay(String(result));
         setPreviousValue(result);
-        setOperation(null);
         setWaitingForOperand(true);
       } catch (error) {
         setDisplay('Error');
