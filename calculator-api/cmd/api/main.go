@@ -1,6 +1,8 @@
 package main
 
 import (
+	"calculator-api/internal/handler"
+	"calculator-api/internal/services"
 	logger "calculator-api/pkg"
 	"context"
 	"log/slog"
@@ -19,18 +21,19 @@ func main() {
 	customLogger := logger.New().GetJSONLogger()
 	slog.SetDefault(customLogger)
 
-	// validator := validator.New()
-
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.SetTrustedProxies(nil)
 	r.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Page not found"})
 	})
 
-	r.POST("api/v1/calculator", )
+	service := services.NewCalculatorService()
+	handler := handler.NewCalculatorHandler(service)
 
-	httpAddr := ":" + os.Getenv("PORT")
+	r.POST("api/v1/calculator", handler.Calculate)
+
+	httpAddr := ":8080"
 	server := &http.Server{
 		Addr:         httpAddr,
 		Handler:      r,
