@@ -32,64 +32,75 @@ function Calculator() {
     setWaitingForOperand(false);
   };
 
-  const performOperation = (nextOperation: string) => {
+  const makeApiCall = async (operation: string, a: number, b?: number) => {
+    try {
+      const response = await fetch('api/v1/calculator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          operation,
+          a,
+          b
+        })
+      });
+      const result = await response.json();
+      return result.result;
+    } catch (error) {
+      console.error('Error performing calculation:', error);
+      throw new Error('Calculation failed');
+    }
+  };
+
+  const performOperation = async (nextOperation: string) => {
     const inputValue = parseFloat(display);
 
     if (previousValue === null) {
+      // First operand
       setPreviousValue(inputValue);
-    } else if (operation) {
-      const currentValue = previousValue || 0;
-      const newValue = calculate(currentValue, inputValue, operation);
-
-      setDisplay(String(newValue));
-      setPreviousValue(newValue);
-    }
-
-    setWaitingForOperand(true);
-    setOperation(nextOperation);
-  };
-
-  const calculate = (firstValue: number, secondValue: number, operation: string): number => {
-    switch (operation) {
-      case "add":
-        return firstValue + secondValue;
-      case "subtract":
-        return firstValue - secondValue;
-      case "multiply":
-        return firstValue * secondValue;
-      case "divide":
-        return secondValue !== 0 ? firstValue / secondValue : 0;
-      case "exponent":
-        return Math.pow(firstValue, secondValue);
-      default:
-        return secondValue;
-    }
-  };
-
-  const handleEquals = () => {
-    const inputValue = parseFloat(display);
-
-    if (previousValue !== null && operation) {
-      const newValue = calculate(previousValue, inputValue, operation);
-      setDisplay(String(newValue));
-      setPreviousValue(null);
-      setOperation(null);
+      setOperation(nextOperation);
       setWaitingForOperand(true);
+    } else if (operation) {
+      // Second operand - perform calculation
+      const currentValue = previousValue || 0;
+
+      try {
+        const result = await makeApiCall(nextOperation, currentValue, inputValue);
+        setDisplay(String(result));
+        setPreviousValue(result);
+        setOperation(null);
+        setWaitingForOperand(true);
+      } catch (error) {
+        setDisplay('Error');
+      }
     }
   };
 
-  const handleSquareRoot = () => {
-    const inputValue = parseFloat(display);
-    const result = Math.sqrt(inputValue);
-    setDisplay(String(result));
-    setWaitingForOperand(true);
+  const handleEquals = async () => {
+    if (previousValue !== null && operation) {
+      try {
+        const result = await makeApiCall(operation, previousValue, parseFloat(display));
+        setDisplay(String(result));
+        setPreviousValue(null);
+        setOperation(null);
+        setWaitingForOperand(true);
+      } catch (error) {
+        setDisplay('Error');
+      }
+    }
   };
 
-  const handlePercentage = () => {
+  const handleSquareRoot = async () => {
     const inputValue = parseFloat(display);
-    const result = inputValue / 100;
-    setDisplay(String(result));
-    setWaitingForOperand(true);
+
+    try {
+      const result = await makeApiCall('sqrt', inputValue);
+      setDisplay(String(result));
+      setWaitingForOperand(true);
+    } catch (error) {
+      setDisplay('Error');
+    }
   };
 
   const handleToggleSign = () => {
@@ -146,7 +157,7 @@ function Calculator() {
           <div className="buttons">
             <button onClick={clear} className="btn clear">AC</button>
             <button onClick={handleToggleSign} className="btn sign">+/-</button>
-            <button onClick={handlePercentage} className="btn percentage">%</button>
+            <button onClick={() => performOperation("percentage")} className="btn percentage">%</button>
             <button onClick={() => performOperation("divide")} className="btn operator">÷</button>
 
             <button onClick={() => inputNumber("7")} className="btn number">7</button>
@@ -168,7 +179,7 @@ function Calculator() {
             <button onClick={inputDecimal} className="btn number">.</button>
             <button onClick={handleEquals} className="btn equals">=</button>
             <button onClick={handleSquareRoot} className="btn advanced">√</button>
-            <button onClick={() => performOperation("exponent")} className="btn advanced">xʸ</button>
+            <button onClick={() => performOperation("power")} className="btn advanced">xʸ</button>
           </div>
         </div>
       </main>
