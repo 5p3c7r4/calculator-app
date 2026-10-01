@@ -1,0 +1,359 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">calculator-api/cmd/api/main.go (0.0%)</option>
+				
+				<option value="file1">calculator-api/internal/handler/calculator-handler.go (84.6%)</option>
+				
+				<option value="file2">calculator-api/internal/services/calculator-service.go (100.0%)</option>
+				
+				<option value="file3">calculator-api/pkg/logger.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "calculator-api/internal/handler"
+        "calculator-api/internal/services"
+        logger "calculator-api/pkg"
+        "context"
+        "log/slog"
+        "net/http"
+        "os"
+        "os/signal"
+        "syscall"
+        "time"
+
+        "github.com/gin-gonic/gin"
+)
+
+func main() <span class="cov0" title="0">{
+        ctx := context.TODO()
+
+        customLogger := logger.New().GetJSONLogger()
+        slog.SetDefault(customLogger)
+
+        gin.SetMode(gin.ReleaseMode)
+        r := gin.New()
+        r.SetTrustedProxies(nil)
+        r.NoRoute(func(ctx *gin.Context) </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": "Page not found"})
+        }</span>)
+
+        <span class="cov0" title="0">service := services.NewCalculatorService()
+        handler := handler.NewCalculatorHandler(service)
+
+        r.POST("api/v1/calculator", handler.Calculate)
+
+        httpAddr := ":8000"
+        server := &amp;http.Server{
+                Addr:         httpAddr,
+                Handler:      r,
+                ReadTimeout:  5 * time.Second,
+                WriteTimeout: 10 * time.Second,
+                IdleTimeout:  60 * time.Second,
+        }
+
+        // For serving frontend
+        r.Static("/assets", "./frontend/assets")
+        r.StaticFile("/", "./frontend/index.html")
+
+        r.NoRoute(func(c *gin.Context) </span><span class="cov0" title="0">{
+                c.File("./frontend/index.html")
+        }</span>)
+
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                slog.InfoContext(ctx, "HTTP Server Listening on "+httpAddr)
+                if err := server.ListenAndServe(); err != nil &amp;&amp; err != http.ErrServerClosed </span><span class="cov0" title="0">{
+                        slog.ErrorContext(ctx, "Error on server", slog.Any("error", err))
+                        os.Exit(1)
+                }</span>
+        }()
+
+        <span class="cov0" title="0">stop := make(chan os.Signal, 1)
+        signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+        &lt;-stop
+        ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+        defer cancel()
+
+        if err := server.Shutdown(ctx); err != nil </span><span class="cov0" title="0">{
+                slog.ErrorContext(ctx, "HTTP shutdown error", "error", err.Error())
+        }</span>
+        <span class="cov0" title="0">slog.InfoContext(ctx, "Server Stopped Gracefully")</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package handler
+
+import (
+        "errors"
+        "fmt"
+        "log/slog"
+        "net/http"
+
+        "calculator-api/internal/models"
+        "calculator-api/internal/services"
+
+        "github.com/gin-gonic/gin"
+)
+
+// CalculatorHandler handles calculator HTTP requests
+type CalculatorHandler struct {
+        service *services.CalculatorService
+}
+
+// NewCalculatorHandler creates a new calculator handler
+func NewCalculatorHandler(service *services.CalculatorService) *CalculatorHandler <span class="cov8" title="1">{
+        return &amp;CalculatorHandler{service: service}
+}</span>
+
+// Calculate handles calculator operations
+func (h *CalculatorHandler) Calculate(c *gin.Context) <span class="cov8" title="1">{
+        var req models.CalculatorRequest
+
+        slog.Info("Received calculator request", "operation", req.Operation)
+
+        if err := c.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                slog.Error("Invalid request body", "error", err.Error())
+                c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid request body: %s", err.Error())})
+                return
+        }</span>
+
+        <span class="cov8" title="1">if req.A == nil </span><span class="cov0" title="0">{
+                slog.Error("Parameter A is required")
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Parameter A is required"})
+                return
+        }</span>
+
+        // Validate that B is provided for operations that need it
+        <span class="cov8" title="1">needsB := req.Operation != "sqrt" &amp;&amp; req.Operation != "perc"
+        if needsB &amp;&amp; req.B == nil </span><span class="cov8" title="1">{
+                slog.Error("Parameter B is required for this operation", "operation", req.Operation)
+                c.JSON(http.StatusBadRequest, gin.H{"error": "Parameter B is required for this operation"})
+                return
+        }</span>
+
+        // Perform calculation
+        <span class="cov8" title="1">slog.Info("Performing calculation", "operation", req.Operation, "a", *req.A, "b", req.B)
+        result, err := h.service.PerformOperation(req)
+        if err != nil </span><span class="cov8" title="1">{
+                slog.Error("Calculation failed", "error", err.Error(), "operation", req.Operation)
+                if errors.Is(err, services.ErrDivisionByZero) || errors.Is(err, services.ErrSqrtOfNegative) </span><span class="cov8" title="1">{
+                        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                }</span> else<span class="cov0" title="0"> {
+                        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid operation"})
+                }</span>
+                <span class="cov8" title="1">return</span>
+        }
+
+        <span class="cov8" title="1">slog.Info("Calculation successful", "result", result.Result)
+        c.JSON(http.StatusOK, result)</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package services
+
+import (
+        "calculator-api/internal/models"
+        "errors"
+        "log/slog"
+        "math"
+)
+
+var (
+        ErrDivisionByZero = errors.New("you can not divide by zero")
+        ErrSqrtOfNegative = errors.New("you can not get square root of a negative number")
+        ErrUnsuportedOperation = errors.New("unsupported operation")
+)
+
+// CalculatorService handles calculator operations
+type CalculatorService struct{}
+
+// NewCalculatorService creates a new calculator service
+func NewCalculatorService() *CalculatorService <span class="cov8" title="1">{
+        return &amp;CalculatorService{}
+}</span>
+
+// CalculatorResponse represents the response structure for calculator operations
+type CalculatorResponse struct {
+        Result float64 `json:"result"`
+}
+
+// PerformOperation executes the requested calculator operation
+func (s *CalculatorService) PerformOperation(req models.CalculatorRequest) (CalculatorResponse, error) <span class="cov8" title="1">{
+        slog.Info("Starting calculation", "operation", req.Operation, "a", *req.A, "b", req.B)
+        
+        switch req.Operation </span>{
+        case "add":<span class="cov8" title="1">
+                result := *req.A + *req.B
+                slog.Info("Addition operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "subtract":<span class="cov8" title="1">
+                result := *req.A - *req.B
+                slog.Info("Subtraction operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "multiply":<span class="cov8" title="1">
+                result := *req.A * *req.B
+                slog.Info("Multiplication operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "divide":<span class="cov8" title="1">
+                if *req.B == 0 </span><span class="cov8" title="1">{
+                        slog.Error("Division by zero attempted", "a", *req.A, "b", *req.B)
+                        return CalculatorResponse{}, ErrDivisionByZero
+                }</span>
+                <span class="cov8" title="1">result := *req.A / *req.B
+                slog.Info("Division operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "power":<span class="cov8" title="1">
+                result := math.Pow(*req.A, *req.B)
+                slog.Info("Power operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "sqrt":<span class="cov8" title="1">
+                if *req.A &lt; 0 </span><span class="cov8" title="1">{
+                        slog.Error("Square root of negative number attempted", "a", *req.A)
+                        return CalculatorResponse{}, ErrSqrtOfNegative
+                }</span>
+                <span class="cov8" title="1">result := math.Sqrt(*req.A)
+                slog.Info("Square root operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        case "percentage":<span class="cov8" title="1">
+                result := *req.A * (*req.B / 100)
+                slog.Info("Percentage operation completed", "result", result)
+                return CalculatorResponse{Result: result}, nil</span>
+        default:<span class="cov8" title="1">
+                slog.Error("Unsupported operation attempted", "operation", req.Operation)
+                return CalculatorResponse{}, ErrUnsuportedOperation</span>
+        }
+}</pre>
+		
+		<pre class="file" id="file3" style="display: none">package logger
+
+import (
+        "io"
+        "log/slog"
+        "os"
+)
+
+var handler slog.Handler
+
+type logger struct {
+        logLevelVar *slog.LevelVar
+        out         io.Writer
+        options     *slog.HandlerOptions
+}
+
+func (l *logger) GetJSONLogger() *slog.Logger <span class="cov0" title="0">{
+        handler = slog.NewJSONHandler(l.out, l.options)
+        logger := slog.New(handler)
+        return logger
+}</span>
+
+func New(envFile ...string) *logger <span class="cov0" title="0">{
+        var levelVar = new(slog.LevelVar)
+        logger := &amp;logger{
+                logLevelVar: levelVar,
+                out:         os.Stderr,
+                options: &amp;slog.HandlerOptions{
+                        Level:     levelVar,
+                        AddSource: true,
+                },
+        }
+        return logger
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
