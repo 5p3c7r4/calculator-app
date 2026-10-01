@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	ErrDivisionByZero = errors.New("division by zero")
-	ErrSqrtOfNegative = errors.New("square root of negative number")
+	ErrDivisionByZero = errors.New("you can not divide by zero")
+	ErrSqrtOfNegative = errors.New("you can not get square root of a negative number")
 	ErrUnsuportedOperation = errors.New("unsupported operation")
 )
 
