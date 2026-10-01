@@ -322,10 +322,6 @@ input {
     font-size: 15px;
   }
 
-  .features {
-    display: none;
-  }
-
   .calculator {
     padding: 12px;
     border-radius: 20px;
